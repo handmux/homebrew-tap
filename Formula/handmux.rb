@@ -6,7 +6,7 @@ class Handmux < Formula
   license "AGPL-3.0-only"
 
   livecheck do
-    url "https://registry.npmjs.org/handmux/-/handmux-0.12.3.tgz"
+    url "https://registry.npmjs.org/handmux/latest"
     regex(/"version"\s*:\s*"([^"]+)"/i)
   end
 
