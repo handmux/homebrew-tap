@@ -2,11 +2,11 @@ class Handmux < Formula
   desc "Mobile-web gateway to a shared tmux server"
   homepage "https://handmux.com"
   url "https://registry.npmjs.org/handmux/-/handmux-0.12.3.tgz"
-  sha256 "9159317d541186650415f771352e8b293247f5e62354bf43b321415b269fe3de"
+  sha256 "33f002b0dc72f55c3db82f48bd0ca23fc8bc904554c41d120e357584f3e5d035"
   license "AGPL-3.0-only"
 
   livecheck do
-    url "https://registry.npmjs.org/handmux/latest"
+    url "https://registry.npmjs.org/handmux/-/handmux-0.12.3.tgz"
     regex(/"version"\s*:\s*"([^"]+)"/i)
   end
 
