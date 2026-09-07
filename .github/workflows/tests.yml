@@ -71,8 +71,26 @@ jobs:
           bin/shellcheck --version
           bin/actionlint -version
           echo "${linter_dir}/bin" >> "${GITHUB_PATH}"
+          # Match test-bot's prefix-first PATH; diagnose rather than install anything.
+          brew_prefix=$(brew --prefix)
+          diagnostic_path="${brew_prefix}/bin:${brew_prefix}/sbin:${linter_dir}/bin:${PATH}"
+          env PATH="${diagnostic_path}" HOMEBREW_PATH="${diagnostic_path}" brew ruby -e '
+            require "formula"
+            require "system_command"
+            { "shellcheck" => ["--version"], "actionlint" => ["-version"] }.each do |name, args|
+              executable = which(name, ORIGINAL_PATHS)
+              expected = Formula[name].version.to_s
+              puts "#{name}: selected=#{executable || "missing"}; Formula.version=#{expected}"
+              abort "#{name} is missing from the test-bot PATH" unless executable
+              result = SystemCommand.run(executable, args: args, print_stderr: true)
+              puts result.stdout
+              actual = result.stdout[/\d+(?:\.\d+)+/]
+              abort "#{name} version mismatch: #{actual.inspect}, expected #{expected}" unless result.success? && actual == expected
+            end
+          '
 
-      - run: brew test-bot --only-tap-syntax
+      - run: brew test-bot --only-tap-syntax --verbose
+        timeout-minutes: 15
       - run: brew test-bot --only-formulae
         if: github.event_name == 'pull_request'
 
