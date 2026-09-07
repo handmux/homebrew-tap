@@ -40,6 +40,38 @@ jobs:
 
       - run: brew test-bot --only-setup
 
+      # Intel macOS lacks current bottles for the linters' build dependencies.
+      # Use upstream binaries without removing any brew style/test-bot checks.
+      - name: Prepare Intel macOS style linters
+        if: matrix.os == 'macos-15-intel'
+        timeout-minutes: 5
+        shell: bash
+        run: |
+          set -euo pipefail
+          brew ruby -e '
+            require "formula"
+            { "shellcheck" => "0.11.0", "actionlint" => "1.7.12" }.each do |name, expected|
+              actual = Formula[name].version.to_s
+              abort "#{name} is now #{actual}; update the pinned CI binary and checksum (expected #{expected})" unless actual == expected
+            end
+          '
+          linter_dir=$(mktemp -d "${RUNNER_TEMP}/handmux-linters.XXXXXX")
+          mkdir "${linter_dir}/bin"
+          cd "${linter_dir}"
+          curl --fail --location --retry 2 --connect-timeout 15 --max-time 60 \
+            --output shellcheck.tar.gz \
+            https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.darwin.x86_64.tar.gz
+          echo 'c2c15e08df0e8fbc374c335b230a7ee958c313fa5714817a59aa59f1aa594f51  shellcheck.tar.gz' | shasum -a 256 -c -
+          tar -xzf shellcheck.tar.gz --strip-components=1 -C bin shellcheck-v0.11.0/shellcheck
+          curl --fail --location --retry 2 --connect-timeout 15 --max-time 60 \
+            --output actionlint.tar.gz \
+            https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_darwin_amd64.tar.gz
+          echo '5b44c3bc2255115c9b69e30efc0fecdf498fdb63c5d58e17084fd5f16324c644  actionlint.tar.gz' | shasum -a 256 -c -
+          tar -xzf actionlint.tar.gz -C bin actionlint
+          bin/shellcheck --version
+          bin/actionlint -version
+          echo "${linter_dir}/bin" >> "${GITHUB_PATH}"
+
       - run: brew test-bot --only-tap-syntax
       - run: brew test-bot --only-formulae
         if: github.event_name == 'pull_request'
