@@ -1,8 +1,8 @@
 class Handmux < Formula
   desc "Mobile-web gateway to a shared tmux server"
   homepage "https://handmux.com"
-  url "https://registry.npmjs.org/handmux/-/handmux-0.35.0.tgz"
-  sha256 "3928e5cb6386ad544f6b73a93c92337f9264795182eecdfed808c9569b190e9a"
+  url "https://registry.npmjs.org/handmux/-/handmux-0.36.0.tgz"
+  sha256 "1cfd10ff129b27108b1d3d89fdaaa8fca301802872323dc8773c3322f977e136"
   license "AGPL-3.0-only"
 
   livecheck do
